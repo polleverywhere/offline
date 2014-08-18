@@ -27,6 +27,7 @@ defaultOptions =
       url: ->
         # This can be any image, this is the better option if your image is on a different domain, otherwise just use XHR
         "/favicon.ico?_=#{ Math.floor(Math.random() * 1000000000) }"
+      timeout: 5000
 
     active: 'xhr'
 
@@ -194,6 +195,15 @@ Offline.checks.image = ->
   img.onerror = Offline.markDown
   img.onload = Offline.markUp
   img.src = Offline.getOption('checks.image.url')
+
+  imageTimeout = Offline.getOption('checks.image.timeout')
+  if imageTimeout
+    setTimeout ->
+      # https://stereochro.me/ideas/detecting-broken-images-js
+      imageLoadFailed = not img.complete or
+        (typeof img.naturalWidth isnt 'undefined' and img.naturalWidth is 0)
+      Offline.markDown() if imageLoadFailed
+    , imageTimeout
 
   undefined
 
